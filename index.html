@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ML CI/CD Demo | Iris Classifier</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b1220; --panel:#121e31; --text:#edf4ff; --muted:#a8b8ce; --teal:#51e0c2; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Inter, ui-sans-serif, system-ui, Arial, sans-serif; background: radial-gradient(circle at top right,#173c51 0,#0b1220 45%); color:var(--text); min-height:100vh; }
+    main { max-width:900px; margin:0 auto; padding:64px 22px; }
+    .eyebrow { color:var(--teal); text-transform:uppercase; letter-spacing:.15em; font-size:.78rem; font-weight:700; }
+    h1 { font-size:clamp(2.2rem,6vw,4rem); line-height:1.05; margin:14px 0; }
+    .intro { color:var(--muted); font-size:1.08rem; line-height:1.7; max-width:680px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin:32px 0; }
+    .card { background:rgba(18,30,49,.92); border:1px solid #2b4059; border-radius:18px; padding:22px; }
+    .label { color:var(--muted); font-size:.9rem; }
+    .value { font-size:1.55rem; font-weight:750; margin-top:10px; overflow-wrap:anywhere; }
+    .status { display:inline-flex; align-items:center; gap:8px; color:var(--teal); background:#123a38; border:1px solid #21675d; padding:8px 12px; border-radius:999px; font-size:.9rem; }
+    .dot { width:8px; height:8px; border-radius:50%; background:var(--teal); }
+    footer { margin-top:38px; border-top:1px solid #26364b; padding-top:20px; color:var(--muted); font-size:.9rem; line-height:1.6; }
+    code { color:var(--teal); }
+  </style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Machine Learning · Continuous Integration · Continuous Deployment</div>
+  <h1>ML CI/CD Pipeline</h1>
+  <p class="intro">A demonstration project that trains a scikit-learn classifier on the Iris dataset, validates it with pytest, and publishes this status page through GitHub Actions and GitHub Pages.</p>
+  <span class="status"><span class="dot"></span><span id="status">Loading deployment status…</span></span>
+  <section class="grid" aria-label="Model details">
+    <article class="card"><div class="label">Model</div><div class="value" id="model">Logistic Regression</div></article>
+    <article class="card"><div class="label">Dataset</div><div class="value" id="dataset">Iris</div></article>
+    <article class="card"><div class="label">Test accuracy</div><div class="value" id="accuracy">Loading…</div></article>
+    <article class="card"><div class="label">Test samples</div><div class="value" id="samples">Loading…</div></article>
+  </section>
+  <article class="card">
+    <div class="label">Pipeline sequence</div>
+    <div class="value">Commit → CI tests → CD deploy</div>
+    <p class="intro">The deployment job uses <code>needs: ci</code>, so the website is published only after the CI job succeeds.</p>
+  </article>
+  <footer>Academic demonstration only. Model performance is measured on a held-out test split and is not a guarantee of performance on other data.</footer>
+</main>
+<script>
+fetch('./model_results.json')
+  .then(response => { if (!response.ok) throw new Error('Results file not available'); return response.json(); })
+  .then(data => {
+    document.getElementById('model').textContent = data.model;
+    document.getElementById('dataset').textContent = data.dataset;
+    document.getElementById('accuracy').textContent = data.accuracy_percent + '%';
+    document.getElementById('samples').textContent = data.test_samples;
+    document.getElementById('status').textContent = data.ci_cd_status;
+  })
+  .catch(() => {
+    document.getElementById('status').textContent = 'Page deployed; results file not loaded';
+    document.getElementById('accuracy').textContent = 'See Actions logs';
+    document.getElementById('samples').textContent = '—';
+  });
+</script>
+</body>
+</html>
